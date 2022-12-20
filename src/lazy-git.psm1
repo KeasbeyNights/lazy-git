@@ -1,11 +1,11 @@
-. $PSScriptRoot\Scripts\PullAll.ps1
-. $PSScriptRoot\Scripts\FetchAll.ps1
+. $PSScriptRoot\PullAll.ps1
+. $PSScriptRoot\FetchAll.ps1
+. $PSScriptRoot\Utils.ps1
 
-function LazyGitCheck() {
-    Write-Host "Lazy git imported!" -f Magenta
+function CheckLazyGit() {
+    Write-Host "Lazy git imported! 3" -f Magenta
 }
 
-[CmdletBinding]
 function PullMain([Alias('r')][switch]$reset) {
 
     if ($reset) {
@@ -16,8 +16,9 @@ function PullMain([Alias('r')][switch]$reset) {
     git pull
 }
 
-function Checkout([string]$branch) {
-    Write-Host "MODULE 3" -f Magenta
+function Checkout(
+    [Parameter(mandatory = $true)]
+    [string]$branch) {
     git checkout $branch;
     git fetch;
 }
@@ -28,7 +29,8 @@ function Open {
 
 $exportModuleMemberParams = @{
     Function = @(
-        'LazyGitCheck',
+        'Add-LazyGitToProfile'
+        'CheckLazyGit',
         'PullMain',
         'Checkout',
         'Open',
