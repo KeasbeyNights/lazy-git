@@ -58,11 +58,8 @@ function Add-LazyGitToProfile {
     Write-Verbose "`$PSScriptRoot = '$PSScriptRoot'"
     
     if ($PSCmdlet.ShouldProcess($selectedModuleDirectory, "Create current user PowerShell profile directory")) {
-        $moduleDirectory = "$selectedModuleDirectory\lazy-git"
-        if (!(Test-Path $moduleDirectory)) {
-            New-item -Name "lazy-git" -Type directory -Path $selectedModuleDirectory
-        }
-        Copy-Item -Path "$PSScriptRoot\*" -Destination $moduleDirectory -Recurse -Verbose
+        $moduleDirectory = New-item -Name "lazy-git" -Type directory -Path $selectedModuleDirectory
+        Copy-Item -Path "C:\Users\MichaelKing\Documents\GitHub\lazy-git\src\*" -Destination $moduleDirectory -Recurse -Verbose
     }
 
     #TODO Only add if not already in profile
