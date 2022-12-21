@@ -52,51 +52,61 @@ function Add-LazyGitToProfile {
         }
         
         Set-GitRepositoryEnv $GitDirectory
-
-        #TODO Only add if not already in profile
-        # $profileContent = "`nImport-Module lazy-git"
-        # if ($PSCmdlet.ShouldProcess($profilePath, "Add 'Import-Module lazy-git' to profile")) {
-        #     Add-Content -LiteralPath $profilePath -Value $profileContent -Encoding UTF8
-        # }
     }
+
+    AddModuleToProfile $profilePath
 }
-    function Test-LazyGitImportedInScript {
-        param (
-            [Parameter(Mandatory = $true)]
-            [string]
-            $Path
-        )
 
-        if (!$Path -or !(Test-Path -LiteralPath $Path)) {
-            return $false
-        }
+function Test-LazyGitImportedInScript {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]
+        $Path
+    )
 
-        $match = (@(Get-Content $Path -ErrorAction SilentlyContinue) -match 'lazy-git').Count -gt 0
-        if ($match) {
-            Write-Verbose "lazy-git found in '$Path'" 
-        }
-        $match
+    if (!$Path -or !(Test-Path -LiteralPath $Path)) {
+        return $false
     }
 
-    function CopyModule() {
-        #TODO allow user to override modules path
-        $moduleDirectories = $ENV:PSModulePath -split ';'
-        $selectedModuleDirectory = $moduleDirectories[0];
-
-        Write-Verbose "`$selectedModuleDirectory = '$selectedModuleDirectory'"
-        $modulePath = $selectedModuleDirectory + "\lazy-git"
-        Write-Verbose "`$modulePath = '$modulePath'"
-        Write-Verbose "`$PSScriptRoot = '$PSScriptRoot'"
-
-        $moduleDirectory = "$selectedModuleDirectory\lazy-git"
-        if (!(Test-Path $moduleDirectory)) {
-            New-item -Name "lazy-git" -Type directory -Path $selectedModuleDirectory
-        }
-        Copy-Item -Path "$PSScriptRoot\*" -Destination $moduleDirectory -Recurse -Verbose
+    $match = (@(Get-Content $Path -ErrorAction SilentlyContinue) -match 'lazy-git').Count -gt 0
+    if ($match) {
+        Write-Verbose "lazy-git found in '$Path'" 
     }
+    $match
+}
 
-    function Set-GitRepositoryEnv([Parameter(Mandatory = $true)]
-        [string] $repoPath) {
-        Write-Verbose "Setting environment variable GitRepo to $repoPath for current user"
-        [Environment]::SetEnvironmentVariable('GitRepo', $repoPath)
+function CopyModule() {
+    #TODO allow user to override modules path
+    $moduleDirectories = $ENV:PSModulePath -split ';'
+    $selectedModuleDirectory = $moduleDirectories[0];
+
+    Write-Verbose "`$selectedModuleDirectory = '$selectedModuleDirectory'"
+    $modulePath = $selectedModuleDirectory + "\lazy-git"
+    Write-Verbose "`$modulePath = '$modulePath'"
+    Write-Verbose "`$PSScriptRoot = '$PSScriptRoot'"
+
+    $moduleDirectory = "$selectedModuleDirectory\lazy-git"
+    if (!(Test-Path $moduleDirectory)) {
+        New-item -Name "lazy-git" -Type directory -Path $selectedModuleDirectory
     }
+    Copy-Item -Path "$PSScriptRoot\*" -Destination $moduleDirectory -Recurse -Verbose
+}
+
+function Set-GitRepositoryEnv([Parameter(Mandatory = $true)]
+    [string] $repoPath) {
+    Write-Verbose "Setting environment variable GitRepo to $repoPath for current user"
+    [Environment]::SetEnvironmentVariable('GitRepo', $repoPath)
+}
+
+function AddModuleToProfile([Parameter(Mandatory = $true)]
+    [string] $profilePath) {
+    $profileContent = "Import-Module lazy-git"
+    
+    if (Select-String -Path $profilePath -Pattern $profileContent -Quiet) {
+        Write-Verbose "lazy-git already imported to profile"
+        return
+    }
+    
+    Write-Verbose "Adding lazy-git to $profilePath"    
+    Add-Content -LiteralPath $profilePath -Value "`n$profileContent" -Encoding UTF8
+}
