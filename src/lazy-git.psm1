@@ -29,7 +29,7 @@ function Open {
 
 $exportModuleMemberParams = @{
     Function = @(
-        'Add-LazyGitToProfile'
+        'Add-LazyGitToProfile',
         'CheckLazyGit',
         'PullMain',
         'Checkout',

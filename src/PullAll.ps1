@@ -1,8 +1,7 @@
 
-# $allColours = [enum]::GetValues([System.ConsoleColor])
 $colourOptions = @('DarkBlue', 'DarkGreen', 'DarkCyan', 'DarkMagenta', 'DarkYellow', 'Cyan', 'Magenta'); #, 'Blue', 'Green', 'Yellow')
 $global:colours = @();
-$repoDirectory = Split-Path $PSScriptRoot;
+$repoDirectory = "C:\Users\MichaelKing\Github";
 
 function SelectColour() {
     
@@ -10,7 +9,6 @@ function SelectColour() {
         $global:colours = $colourOptions;
     }
     
-    # $selectedColour = if ($global:colours.Count -eq 1) { $global:colours } else { (Get-random $global:colours) };    
     $selectedColour = ($global:colours.Count -eq 1) ? $global:colours : (Get-random $global:colours);
     $global:colours = $global:colours | Where-Object { $_ -ne $selectedColour };
 

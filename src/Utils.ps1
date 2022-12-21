@@ -30,34 +30,64 @@ function Add-LazyGitToProfile {
         return
     }
 
-    if (!$Force) {
-        $alreadyInProfile = Test-LazyGitImportedInScript $profilePath
-        if ($alreadyInProfile) {
-            Write-Warning "lazy-git already imported into '$profilePath'"
+    $alreadyInProfile = Test-LazyGitImportedInScript $profilePath
+
+    if (!$Force -AND ($alreadyInProfile)) {
+        Write-Warning "lazy-git already imported into '$profilePath'"
+        return 
+    }
+    else {
+        CopyModule
+    }
+
+    $env:GitRepo = [Environment]::GetEnvironmentVariable('GitRepo', 'User')
+    if ((!$GitDirectory) -AND !(Test-Path $env:GitRepo)) {
+        $GitDirectory = Read-Host -Prompt "Directory containing all git repos"
+    }
+    
+    if (![string]::IsNullOrEmpty($GitDirectory)) {
+        if (!(Test-Path $GitDirectory)) {
+            Write-Warning "$GitDirectory does not exist"
             return
-        }    
+        }
+        
+        Set-GitRepositoryEnv $GitDirectory
+
+        #TODO Only add if not already in profile
+        # $profileContent = "`nImport-Module lazy-git"
+        # if ($PSCmdlet.ShouldProcess($profilePath, "Add 'Import-Module lazy-git' to profile")) {
+        #     Add-Content -LiteralPath $profilePath -Value $profileContent -Encoding UTF8
+        # }
+    }
+}
+    function Test-LazyGitImportedInScript {
+        param (
+            [Parameter(Mandatory = $true)]
+            [string]
+            $Path
+        )
+
+        if (!$Path -or !(Test-Path -LiteralPath $Path)) {
+            return $false
+        }
+
+        $match = (@(Get-Content $Path -ErrorAction SilentlyContinue) -match 'lazy-git').Count -gt 0
+        if ($match) {
+            Write-Verbose "lazy-git found in '$Path'" 
+        }
+        $match
     }
 
-    if (!$GitDirectory) {
-        $gitDirectory = Read-Host -Prompt "Directory containing all git repos"
-    }
-    
-    if (!(Test-Path $gitDirectory)) {
-        Write-Warning "$gitDirectory does not exist"
-        return
-    }
+    function CopyModule() {
+        #TODO allow user to override modules path
+        $moduleDirectories = $ENV:PSModulePath -split ';'
+        $selectedModuleDirectory = $moduleDirectories[0];
 
-    #TODO allow user to override modules path
-    $moduleDirectories = $ENV:PSModulePath -split ';'
-    $selectedModuleDirectory = $moduleDirectories[0];
-    $profileContent = "`nImport-Module lazy-git"
+        Write-Verbose "`$selectedModuleDirectory = '$selectedModuleDirectory'"
+        $modulePath = $selectedModuleDirectory + "\lazy-git"
+        Write-Verbose "`$modulePath = '$modulePath'"
+        Write-Verbose "`$PSScriptRoot = '$PSScriptRoot'"
 
-    Write-Verbose "`$selectedModuleDirectory = '$selectedModuleDirectory'"
-    $modulePath = $selectedModuleDirectory + "\lazy-git"
-    Write-Verbose "`$modulePath = '$modulePath'"
-    Write-Verbose "`$PSScriptRoot = '$PSScriptRoot'"
-    
-    if ($PSCmdlet.ShouldProcess($selectedModuleDirectory, "Create current user PowerShell profile directory")) {
         $moduleDirectory = "$selectedModuleDirectory\lazy-git"
         if (!(Test-Path $moduleDirectory)) {
             New-item -Name "lazy-git" -Type directory -Path $selectedModuleDirectory
@@ -65,26 +95,8 @@ function Add-LazyGitToProfile {
         Copy-Item -Path "$PSScriptRoot\*" -Destination $moduleDirectory -Recurse -Verbose
     }
 
-    #TODO Only add if not already in profile
-    # if ($PSCmdlet.ShouldProcess($profilePath, "Add 'Import-Module lazy-git' to profile")) {
-    #     Add-Content -LiteralPath $profilePath -Value $profileContent -Encoding UTF8
-    # }
-}
-
-function Test-LazyGitImportedInScript {
-    param (
-        [Parameter(Position = 0)]
-        [string]
-        $Path
-    )
-
-    if (!$Path -or !(Test-Path -LiteralPath $Path)) {
-        return $false
+    function Set-GitRepositoryEnv([Parameter(Mandatory = $true)]
+        [string] $repoPath) {
+        Write-Verbose "Setting environment variable GitRepo to $repoPath for current user"
+        [Environment]::SetEnvironmentVariable('GitRepo', $repoPath)
     }
-
-    $match = (@(Get-Content $Path -ErrorAction SilentlyContinue) -match 'lazy-git').Count -gt 0
-    if ($match) {
-        Write-Verbose "lazy-git found in '$Path'" 
-    }
-    $match
-}
