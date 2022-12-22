@@ -1,7 +1,7 @@
 
 $colourOptions = @('DarkBlue', 'DarkGreen', 'DarkCyan', 'DarkMagenta', 'DarkYellow', 'Cyan', 'Magenta'); #, 'Blue', 'Green', 'Yellow')
 $global:colours = @();
-$repoDirectory = "C:\Users\MichaelKing\Github";
+$env:GitRepo = [Environment]::GetEnvironmentVariable('GitRepo', 'User')
 
 function SelectColour() {
     
@@ -15,10 +15,8 @@ function SelectColour() {
     return $selectedColour;
 }
 
-function PullAll([Alias('r')][switch]$reset){
-    Write-Host 'MODULE:Pulling all repos in' $repoDirectory -f Yellow
-    Get-ChildItem –Path $repoDirectory -Directory |
-    
+function PullAll([Alias('r')][switch]$reset) {
+    Get-ChildItem –Path $env:GitRepo -Directory |
     Foreach-Object {
         $colour = SelectColour;
         Write-Host '-->'$_.Name'<--' -f $colour;

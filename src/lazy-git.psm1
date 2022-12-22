@@ -3,7 +3,7 @@
 . $PSScriptRoot\Utils.ps1
 
 function CheckLazyGit() {
-    Write-Host "Lazy git imported! 4" -f Magenta
+    Write-Host "Lazy git imported!" -f Magenta
 }
 
 function PullMain([Alias('r')][switch]$reset) {
