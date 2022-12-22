@@ -1,11 +1,12 @@
 function FetchAll() {
-    $repoDirectory = Split-Path ($PSScriptRoot)
+    $env:GitRepo = [Environment]::GetEnvironmentVariable('GitRepo', 'User')
+    Write-Progress 'Fetching all repos in' $env:GitRepo
+    $i = 0    
 
-    Write-Host 'Fetching all repos in' $repoDirectory -f Yellow
-    Get-ChildItem –Path $repoDirectory -Directory |
-
-    Foreach-Object {
-        Write-Host '-->'Fetching $_.FullName'<--' -f DarkGreen
-        git -C $_.FullName fetch;
-    }
+    $directories = Get-ChildItem –Path $env:GitRepo -Directory
+    foreach ($directory in $directories) {
+        git -C $directory fetch;
+        $i++
+        Write-Progress -activity "Fetching all repos..." -status "Fetching: $directory.Name ($i of $($directories.Count))" -percentComplete (($i / $directories.Count) * 100)
+    }    
 }

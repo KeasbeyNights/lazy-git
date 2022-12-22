@@ -55,6 +55,7 @@ function Add-LazyGitToProfile {
     }
 
     AddModuleToProfile $profilePath
+    Write-Host 'lazy-git installed' -f Green
 }
 
 function Test-LazyGitImportedInScript {
@@ -89,13 +90,23 @@ function CopyModule() {
     if (!(Test-Path $moduleDirectory)) {
         New-item -Name "lazy-git" -Type directory -Path $selectedModuleDirectory
     }
-    Copy-Item -Path "$PSScriptRoot\*" -Destination $moduleDirectory -Recurse -Verbose
+    Copy-Item -Path "$PSScriptRoot\*" -Destination $moduleDirectory -Recurse
 }
 
-function Set-GitRepositoryEnv([Parameter(Mandatory = $true)]
-    [string] $repoPath) {
-    Write-Verbose "Setting environment variable GitRepo to $repoPath for current user"
-    [Environment]::SetEnvironmentVariable('GitRepo', $repoPath)
+function Set-GitRepositoryEnv {
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    Param
+    (
+        # Path to file
+        [Parameter(Mandatory = $true)]
+        [string] $repoPath
+    )
+
+    if ($PSCmdlet.ShouldProcess($profileDir, "Create current user PowerShell profile directory")) {
+
+        Write-Verbose "Setting environment variable GitRepo to $repoPath for current user"
+        [Environment]::SetEnvironmentVariable('GitRepo', $repoPath)
+    }
 }
 
 function AddModuleToProfile([Parameter(Mandatory = $true)]
