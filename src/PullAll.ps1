@@ -15,7 +15,7 @@ function PullAll([Alias('r')][switch]$reset) {
         $selectedColour = ($colours.Count -eq 1) ? $colours : (Get-random $colours);
         $colours = $colours | Where-Object { $_ -ne $selectedColour };
 
-        Write-Host '-->'$_.Name ($selectedColour)'<--' -f $selectedColour;
+        Write-Host '-->'$_.Name'<--' -f $selectedColour;
     
         if (($reset) -AND ($_.FullName -ne $PSScriptRoot)) {
             Write-Host 'Resetting branch...' -f $selectedColour;
