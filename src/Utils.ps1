@@ -36,9 +36,6 @@ function Add-LazyGitToProfile {
         Write-Warning "lazy-git already imported into '$profilePath'"
         return 
     }
-    else {
-        CopyModule
-    }
 
     $env:GitRepo = [Environment]::GetEnvironmentVariable('GitRepo', 'User')
     if ((!$GitDirectory) -AND !(Test-Path $env:GitRepo)) {
@@ -74,23 +71,6 @@ function Test-LazyGitImportedInScript {
         Write-Verbose "lazy-git found in '$Path'" 
     }
     $match
-}
-
-function CopyModule() {
-    #TODO allow user to override modules path
-    $moduleDirectories = $ENV:PSModulePath -split ';'
-    $selectedModuleDirectory = $moduleDirectories[0];
-
-    Write-Verbose "`$selectedModuleDirectory = '$selectedModuleDirectory'"
-    $modulePath = $selectedModuleDirectory + "\lazy-git"
-    Write-Verbose "`$modulePath = '$modulePath'"
-    Write-Verbose "`$PSScriptRoot = '$PSScriptRoot'"
-
-    $moduleDirectory = "$selectedModuleDirectory\lazy-git"
-    if (!(Test-Path $moduleDirectory)) {
-        New-item -Name "lazy-git" -Type directory -Path $selectedModuleDirectory
-    }
-    Copy-Item -Path "$PSScriptRoot\*" -Destination $moduleDirectory -Recurse
 }
 
 function Set-GitRepositoryEnv {
